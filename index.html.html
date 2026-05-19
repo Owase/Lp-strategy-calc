@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LP Strategy Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--sur:#111118;--sur2:#18181f;--bor:#2a2a38;--acc:#7cffd4;--txt:#e8e8f0;--txt2:#8888a8;--grn:#4ade80;--red:#f87171;--ylw:#fbbf24;--org:#f97316;--pur:#a78bfa;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);padding:0 0 80px}
+.tabs{display:flex;background:var(--sur);border-bottom:1px solid var(--bor);overflow-x:auto;position:sticky;top:0;z-index:100}
+.tab{flex:1;min-width:80px;padding:14px 6px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.tc{display:none;padding:14px}
+.tc.active{display:block}
+.sec{background:var(--sur);border:1px solid var(--bor);border-radius:16px;padding:16px;margin-bottom:14px}
+.st{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.st::after{content:'';flex:1;height:1px;background:var(--bor)}
+.st.red{color:var(--red)}.st.grn{color:var(--grn)}.st.pur{color:var(--pur)}.st.ylw{color:var(--ylw)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2)}
+input[type=number],select{background:var(--sur2);border:1px solid var(--bor);border-radius:10px;padding:9px 11px;color:var(--txt);font-family:var(--mono);font-size:13px;width:100%;transition:border-color .2s;-webkit-appearance:none}
+input[type=number]:focus,select:focus{outline:none;border-color:var(--acc)}
+.ai{border-color:rgba(124,255,212,.35)!important;background:rgba(124,255,212,.04)!important}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rc{background:var(--sur2);border:1px solid var(--bor);border-radius:12px;padding:12px}
+.rc.hi{border-color:rgba(124,255,212,.35);background:rgba(124,255,212,.04)}
+.rc.red{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
+.rc.grn{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.04)}
+.rc.ylw{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.04)}
+.rl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);margin-bottom:4px}
+.rv{font-family:var(--mono);font-size:16px;font-weight:700}
+.rs{font-size:10px;color:var(--txt2);margin-top:2px;font-family:var(--mono)}
+.lh{display:grid;grid-template-columns:100px 60px 110px 110px 70px;gap:8px;padding:0 2px;margin-bottom:6px}
+.lh span,.smtitle{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2)}
+.smtitle{margin-bottom:8px;display:block}
+.lr{display:grid;grid-template-columns:100px 60px 110px 110px 70px;gap:8px;margin-bottom:8px;align-items:center}
+.lb{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--txt2)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.bin{background:rgba(74,222,128,.15);color:var(--grn)}
+.bout{background:rgba(248,113,113,.15);color:var(--red)}
+.bylw{background:rgba(251,191,36,.15);color:var(--ylw)}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--bor);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);border:2px solid var(--bg)}
+.slp{text-align:center;font-family:var(--mono);font-size:24px;font-weight:700;color:var(--acc);margin-bottom:8px}
+.sll{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--txt2);margin-top:5px}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);text-align:left;padding:6px 8px;border-bottom:1px solid var(--bor);white-space:nowrap}
+td{font-family:var(--mono);font-size:12px;padding:8px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+tr.ar td{background:rgba(124,255,212,.05)}
+tr:last-child td{border-bottom:none}
+.ox{overflow-x:auto}
+.hfbig{display:flex;align-items:center;gap:14px;padding:14px;background:var(--sur2);border-radius:12px;border:1px solid var(--bor)}
+.hfnum{font-family:var(--mono);font-size:30px;font-weight:700}
+.hfw{flex:1}.hfbg{height:6px;background:var(--bor);border-radius:3px;overflow:hidden}
+.hff{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.hflbl{font-family:var(--mono);font-size:11px;color:var(--txt2);margin-top:5px}
+/* STEP CARDS — inputs never re-rendered */
+.scard{background:var(--sur2);border:1px solid var(--bor);border-radius:14px;padding:14px;margin-bottom:12px}
+.scard.down{border-left:3px solid var(--red)}
+.scard.up{border-left:3px solid var(--grn)}
+.shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.snum{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--bor);padding:3px 10px;border-radius:20px}
+.sdel{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:16px;padding:4px}
+.sdel:hover{color:var(--red)}
+.sres{margin-top:12px} /* results only, inputs are static */
+.warn{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.ws{background:rgba(74,222,128,.15);color:var(--grn)}.wc{background:rgba(251,191,36,.15);color:var(--ylw)}
+.wd{background:rgba(249,115,22,.15);color:var(--org)}.wl{background:rgba(248,113,113,.15);color:var(--red)}
+.btn{width:100%;background:var(--acc);color:#0a0a0f;border:none;border-radius:12px;padding:13px;font-family:var(--sans);font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px}
+.btn:active{transform:scale(.98);opacity:.85}
+.btn.rb{background:var(--sur);color:var(--red);border:1px solid var(--red)}
+.btn.gb{background:var(--sur);color:var(--grn);border:1px solid var(--grn)}
+.btn.sm{padding:8px;font-size:11px}
+.divider{height:1px;background:var(--bor);margin:12px 0}
+.header{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--bor)}
+.logo{width:36px;height:36px;background:var(--acc);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.header h1{font-size:17px;font-weight:800;letter-spacing:-.5px}
+.header p{font-size:11px;color:var(--txt2);margin-top:1px}
+.tag-btn{display:inline-block;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;margin:2px;border:1px solid;transition:all .15s}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">⚡</div>
+  <div><h1>LP Strategy Planner</h1><p>Uniswap v3 · BTC/USDC</p></div>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <button id="save-btn" onclick="saveState()" style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--acc);cursor:pointer">💾 Зберегти</button>
+    <button onclick="loadState()" style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--txt2);cursor:pointer">📂 Відкрити</button>
+  </div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('plan')">📊 Планувальник</div>
+  <div class="tab" onclick="switchTab('steps')">⚡ Кроки</div>
+  <div class="tab" onclick="switchTab('sum')">🏁 Підсумок</div>
+</div>
+
+<!-- GLOBAL PRICE SLIDER -->
+<div style="background:var(--sur);border-bottom:1px solid var(--bor);padding:12px 16px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+    <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);white-space:nowrap">Ціна BTC</span>
+    <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--acc)" id="global-price-label">$—</div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="setGlobalPrice(G.price)" style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--txt2);cursor:pointer">Скинути</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <input type="range" id="global-slider" oninput="onGlobalSlider()" style="width:100%">
+    <div id="global-slider-marks" style="position:relative;height:20px;margin-top:2px"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--txt2)">
+    <span id="global-sl-min">—</span>
+    <span style="color:var(--txt2)" id="global-sl-entry">▲ Ціна входу</span>
+    <span id="global-sl-max">—</span>
+  </div>
+</div>
+
+<!-- ===== TAB 1 PLANNER ===== -->
+<div id="tab-plan" class="tc active">
+  <div class="sec">
+    <div class="st">📥 Параметри</div>
+    <div class="g2">
+      <div class="f"><label>Капітал для LP ($)</label><input type="number" id="capital" value="15000" class="ai"></div>
+      <div class="f"><label>Поточна ціна BTC ($)</label><input type="number" id="price" value="69400"></div>
+    </div>
+    <div class="g3" style="margin-top:10px">
+      <div class="f"><label>BTC у Fluid (шт)</label><input type="number" id="colBTC" value="0" step="0.0001"></div>
+      <div class="f"><label>Борг USDC ($)</label><input type="number" id="debt" value="0"></div>
+      <div class="f"><label>Ліміт IG ($)</label><input type="number" id="igLimit" value="110000"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="st">🗂 Шари</div>
+    <div class="lh"><span>Шар</span><span>Вага %</span><span>Pa ($)</span><span>Pb ($)</span><span>APR %</span></div>
+    <div id="lc"></div>
+  </div>
+  <div class="sec">
+    <div class="st">🏦 Fluid</div>
+    <div class="g3">
+      <div class="f"><label>Liq threshold (%)</label><input type="number" id="liqTh" value="80"></div>
+      <div class="f"><label>Ставка лендингу (%)</label><input type="number" id="lendR" value="5"></div>
+      <div class="f"><label>Таргет HF для добору</label><input type="number" id="tgtHF" value="2.0" step="0.1"></div>
+    </div>
+  </div>
+  <button class="btn" onclick="calcPlan()">⚡ Розрахувати</button>
+  <div id="planRes" style="display:none;margin-top:14px">
+    <div class="sec">
+      <div class="st">📊 Розподіл</div>
+      <div class="rg">
+        <div class="rc hi"><div class="rl">Разом BTC</div><div class="rv" id="pr-btc">—</div><div class="rs" id="pr-btcusd">—</div></div>
+        <div class="rc hi"><div class="rl">Разом USDC</div><div class="rv" id="pr-usdc">—</div></div>
+        <div class="rc"><div class="rl">LP вартість ✓</div><div class="rv" id="pr-lp">—</div></div>
+        <div class="rc"><div class="rl">Net Worth</div><div class="rv" style="color:var(--grn)" id="pr-nw">—</div></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="st">🔍 Деталі шарів</div>
+      <div id="pr-layers"></div>
+    </div>
+    <div class="sec">
+      <div class="st">🏦 Fluid стан</div>
+      <div class="hfbig" style="margin-bottom:12px">
+        <div><div class="rl">HF</div><div class="hfnum" id="pr-hf">—</div></div>
+        <div class="hfw"><div class="hfbg"><div class="hff" id="pr-hfbar" style="width:0%"></div></div><div class="hflbl" id="pr-liq">—</div></div>
+      </div>
+      <div class="rg">
+        <div class="rc grn"><div class="rl">Добір при HF 2.5 → target</div><div class="rv" id="pr-borrow">—</div><div class="rs" id="pr-borrowsub">—</div></div>
+        <div class="rc"><div class="rl">Ціна ліквідації</div><div class="rv" id="pr-liqp">—</div></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="st">🎯 Сценарії</div>
+      <div class="slp" id="pr-slprice">$—</div>
+      <input type="range" id="pr-sl" oninput="onPlanSlider()">
+      <div class="sll"><span id="pr-slmin">—</span><span style="color:var(--acc)">▲ Зараз</span><span id="pr-slmax">—</span></div>
+      <div class="rg" style="margin-top:12px">
+        <div class="rc"><div class="rl">Net Worth</div><div class="rv" id="sl-nw">—</div><div class="rs" id="sl-nwc">—</div></div>
+        <div class="rc"><div class="rl">LP / IL</div><div class="rv" id="sl-lp">—</div><div class="rs" id="sl-il">—</div></div>
+        <div class="rc"><div class="rl">HF</div><div class="rv" id="sl-hf">—</div><div class="rs" id="sl-hfw">—</div></div>
+        <div class="rc"><div class="rl">Добір USDC</div><div class="rv" id="sl-borrow">—</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="smtitle">Фіксовані сценарії</div>
+      <div class="ox"><table><thead><tr><th>Сц</th><th>Ціна</th><th>Net Worth</th><th>Δ</th><th>HF</th><th>Добір</th><th>Ш1</th><th>Ш2</th><th>Ш3</th></tr></thead><tbody id="pr-sctb"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB STEPS ===== -->
+<div id="tab-steps" class="tc">
+
+  <!-- Portfolio state at slider price -->
+  <div class="sec" id="steps-state-cont"></div>
+
+  <!-- Active positions -->
+  <div class="sec">
+    <div class="st">🟢 Активні позиції</div>
+    <div id="steps-active-positions"></div>
+  </div>
+
+  <!-- Steps list -->
+  <div id="steps-list"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+  <button class="btn" style="background:var(--sur);color:var(--acc);border:1px solid var(--acc)" onclick="addStep(false)">📌 Зафіксувати (закрити LP)</button>
+  <button class="btn" style="background:var(--sur);color:var(--grn);border:1px solid var(--grn)" onclick="addStep(true)">➕ Новий крок (відкрити LP)</button>
+</div>
+</div>
+
+<!-- ===== TAB 4 SUMMARY ===== -->
+<div id="tab-sum" class="tc">
+  <div id="sum-cont"><div class="sec"><p style="color:var(--txt2)">Спочатку розрахуй планувальник.</p></div></div>
+</div>
+
+<script>
+/* ==================== CONSTANTS ==================== */
+const COLS=['#7cffd4','#ffd166','#ff6b6b','#a78bfa'];
+const NAMS=['Широкий','Середній','Вузький 1','Вузький 2'];
+
+/* ==================== STATE ==================== */
+let G = {};         // planner snapshot
+// positions: all LP positions, active + closed
+// {id, name, color, pa, pb, capital, apr, entryPrice, L, btc0, usdc0, status:'active'|'closed', closedPrice, feesEarned}
+let positions = [];
+let downSteps = []; // {id, exitPrice, days, closingIds[], extraBorrow, newPa, newPb, newAPR, newEntryPrice}
+let upSteps   = []; // {id, exitPrice, days, closingId, newPa, newPb, newAPR, igSaved}
+let stepIdCnt = 1;
+
+/* ==================== V3 MATH ==================== */
+const V3 = {
+  sq: (p) => Math.sqrt(p),
+
+  calcL(cap, P, Pa, Pb){
+    if(cap<=0||Pa<=0||Pb<=0||Pa>=Pb) return 0;
+    const sP=this.sq(P), sPa=this.sq(Pa), sPb=this.sq(Pb);
+    if(P<=Pa) return cap/(P*(1/sPa-1/sPb));
+    if(P>=Pb) return cap/(sPb-sPa);
+    return cap/(2*sP-sPa-P/sPb);
+  },
+
+  // Returns {btc, usdc} at price P
+  getTokens(L, P, Pa, Pb){
+    if(L<=0) return {btc:0,usdc:0};
+    const sP=this.sq(P), sPa=this.sq(Pa), sPb=this.sq(Pb);
+    if(P<=Pa) return {btc:L*(1/sPa-1/sPb), usdc:0};
+    if(P>=Pb) return {btc:0, usdc:L*(sPb-sPa)};
+    return {btc:L*(1/sP-1/sPb), usdc:L*(sP-sPa)};
+  },
+
+  posVal(pos, P){
+    const t=this.getTokens(pos.L,P,pos.pa,pos.pb);
+    return t.btc*P+t.usdc;
+  },
+
+  // Avg buy price = capital / max BTC when fully below range
+  // max BTC = L*(1/√Pa - 1/√Pb), L calculated at entryPrice
+  avgBuy(capital, entryP, Pa, Pb){
+    const L=this.calcL(capital,entryP,Pa,Pb);
+    const maxBTC=L*(1/this.sq(Pa)-1/this.sq(Pb));
+    return maxBTC>0 ? capital/maxBTC : 0;
+  }
+};
+
+// Shorthands для зворотньої сумісності
+function sq(p){return V3.sq(p)}
+function calcL(cap,P,Pa,Pb){return V3.calcL(cap,P,Pa,Pb)}
+function gBTC(L,P,Pa,Pb){return V3.getTokens(L,P,Pa,Pb).btc}
+function gUSDC(L,P,Pa,Pb){return V3.getTokens(L,P,Pa,Pb).usdc}
+function posVal(pos,P){return V3.posVal(pos,P)}
+function avgBuyB3(capital,entryP,Pa,Pb){return V3.avgBuy(capital,entryP,Pa,Pb)}
+
+/* ==================== HF HELPERS ==================== */
+function hfCol(h){return h>=2?'var(--grn)':h>=1.5?'var(--ylw)':h>=1.1?'var(--org)':'var(--red)'}
+function hfWarn(h){
+  if(h>=2)return['ws','✅ Безпечно'];if(h>=1.5)return['wc','⚠️ Увага'];
+  if(h>=1.1)return['wd','🔴 Небезпечно'];return['wl','💀 Ліквідація'];
+}
+function calcHF(colBTC,P,debt,liqTh){return debt>0?(colBTC*P*liqTh)/debt:999}
+function maxBorrow(colBTC,P,debt,liqTh,tgt){return Math.max(0,(colBTC*P*liqTh/tgt)-debt)}
+function liqPrice(colBTC,debt,liqTh){return colBTC>0?debt/(colBTC*liqTh):0}
+
+/* ==================== UTILS ==================== */
+function fmt(n,d=2){if(!isFinite(n)||isNaN(n))return'—';return n.toLocaleString('uk-UA',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function pc(v){return v>=0?'var(--grn)':'var(--red)'}
+function ps(v){return v>=0?'+':''}
+function uid(){return stepIdCnt++}
+
+/* ==================== CURRENT PORTFOLIO STATE ==================== */
+function getPortfolio(){
+  let btcFluid = G.colBTC||0;
+  let debt = G.debt||0;
+  let totalFees = 0;
+  let igSavedTotal = 0;
+  let closedCapital = 0;
+  let usdcRolledOver = 0; // USDC що пішли в новий пул, не купували BTC
+
+  downSteps.forEach(s=>{
+    s.closingIds.forEach(id=>{
+      const pos=positions.find(p=>p.id==id);
+      if(pos && s.exitPrice>0){
+        const t=V3.getTokens(pos.L, s.exitPrice, pos.pa, pos.pb);
+        btcFluid += t.btc;
+        usdcRolledOver += t.usdc; // ці USDC пішли в новий LP
+        const fees = pos.capital * pos.apr * (s.days||0) / 365;
+        totalFees += fees;
+        closedCapital += pos.capital;
+      }
+    });
+    debt += s.extraBorrow||0;
+  });
+
+  upSteps.forEach(s=>{
+    totalFees += s.feesEarned||0;
+    igSavedTotal += s.igSaved||0;
+  });
+
+  // avgBuy: тільки капітал що реально став BTC (мінус USDC що пішли в LP, мінус fees)
+  const avgBuy = btcFluid>0 ? (closedCapital - usdcRolledOver - totalFees) / btcFluid : 0;
+
+  return{btcFluid, debt, totalFees, igSavedTotal, closedCapital, usdcRolledOver, avgBuy};
+}
+
+// Active LP value — ітеруємо positions[], закриті ігноруємо
+function getActiveLPValue(price){
+  // Закриті down-кроками
+  const closedByDown = new Set(downSteps.flatMap(s=>s.closingIds).map(x=>+x||x));
+  // Закриті up-кроками (кожен крок вгору "споживає" попередній LP)
+  const closedByUp = new Set(upSteps.map(s=>s._closingId).filter(Boolean));
+  const closedIds = new Set([...closedByDown, ...closedByUp]);
+
+  // Серед step LP — активний тільки останній
+  const lastDsId = downSteps.length>0 ? 'ds_'+downSteps[downSteps.length-1].id : null;
+  const lastUsId = upSteps.length>0 && upSteps[upSteps.length-1]._L>0
+    ? 'us_'+upSteps[upSteps.length-1].id : null;
+
+  let val = 0;
+  positions.forEach(p=>{
+    if(closedIds.has(p.id)||closedIds.has(+p.id)) return;
+    if(p.isStepLP){
+      if(lastUsId){ if(p.id!==lastUsId) return; }
+      else { if(p.id!==lastDsId) return; }
+    }
+    val += V3.posVal(p, price);
+  });
+  return val;
+}
+
+function getActivePosAtPrice(P){
+  // active positions = those with status 'active'
+  return positions.filter(p=>p.status==='active');
+}
+
+/* ==================== INIT LAYERS ==================== */
+function initLayers(){
+  const d=[{pct:70,pa:50000,pb:73200,apr:45},{pct:30,pa:60000,pb:73000,apr:80},{pct:0,pa:65000,pb:72000,apr:120},{pct:0,pa:68000,pb:71000,apr:200}];
+  document.getElementById('lc').innerHTML=d.map((x,i)=>`
+    <div class="lr">
+      <div class="lb"><div class="dot" style="background:${COLS[i]}"></div>${NAMS[i]}</div>
+      <div class="f"><input type="number" id="l${i}p" value="${x.pct}"></div>
+      <div class="f"><input type="number" id="l${i}a" value="${x.pa}"></div>
+      <div class="f"><input type="number" id="l${i}b" value="${x.pb}"></div>
+      <div class="f"><input type="number" id="l${i}r" value="${x.apr}"></div>
+    </div>`).join('');
+}
+
+/* ==================== PLANNER ==================== */
+function calcPlan(){
+  const capital=+document.getElementById('capital').value||0;
+  const price=+document.getElementById('price').value||0;
+  const colBTC=+document.getElementById('colBTC').value||0;
+  const debt=+document.getElementById('debt').value||0;
+  const liqTh=(+document.getElementById('liqTh').value||80)/100;
+  const lendR=(+document.getElementById('lendR').value||5)/100;
+  const tgtHF=+document.getElementById('tgtHF').value||2.0;
+  const igLimit=+document.getElementById('igLimit').value||110000;
+
+  const rawLayers=NAMS.map((_,i)=>({
+    name:NAMS[i],color:COLS[i],
+    pct:(+document.getElementById(`l${i}p`).value||0)/100,
+    pa:+document.getElementById(`l${i}a`).value||0,
+    pb:+document.getElementById(`l${i}b`).value||0,
+    apr:(+document.getElementById(`l${i}r`).value||0)/100,
+  })).filter(l=>l.pct>0&&l.pa>0&&l.pb>0);
+
+  // Build positions from planner
+  positions=[];
+  let totalBTC=0,totalUSDC=0;
+  rawLayers.forEach((l,i)=>{
+    const cap=capital*l.pct;
+    const L=calcL(cap,price,l.pa,l.pb);
+    const btc=gBTC(L,price,l.pa,l.pb);
+    const usdc=gUSDC(L,price,l.pa,l.pb);
+    totalBTC+=btc;totalUSDC+=usdc;
+    positions.push({id:uid(),name:l.name,color:l.color,pa:l.pa,pb:l.pb,
+      capital:cap,apr:l.apr,entryPrice:price,L,btc0:btc,usdc0:usdc,
+      status:'active',feesEarned:0});
+  });
+
+  const lpCheck=totalBTC*price+totalUSDC;
+  const netWorth=lpCheck+colBTC*price-debt;
+  const wAPR=rawLayers.reduce((s,l)=>s+l.pct*l.apr,0);
+  const hfNow=calcHF(colBTC,price,debt,liqTh);
+  const lprice=liqPrice(colBTC,debt,liqTh);
+  const canBorrow=hfNow>=2.5?maxBorrow(colBTC,price,debt,liqTh,tgtHF):0;
+
+  G={capital,price,colBTC,debt,liqTh,lendR,tgtHF,igLimit,
+     totalBTC,totalUSDC,lpCheck,netWorth,wAPR,hfNow,liqPrice:lprice,
+     canBorrow,rawLayers};
+  steps=[];
+
+  // Render summary cards
+  document.getElementById('pr-btc').textContent=fmt(totalBTC,6)+' BTC';
+  document.getElementById('pr-btcusd').textContent='≈ $'+fmt(totalBTC*price);
+  document.getElementById('pr-usdc').textContent='$'+fmt(totalUSDC);
+  document.getElementById('pr-lp').textContent='$'+fmt(lpCheck);
+  document.getElementById('pr-nw').textContent='$'+fmt(netWorth);
+
+  // Layer detail cards
+  document.getElementById('pr-layers').innerHTML=positions.map(pos=>{
+    const inR=price>=pos.pa&&price<=pos.pb;
+    const avg=avgBuyB3(pos.capital,price,pos.pa,pos.pb);
+    return`<div style="background:var(--bg);border:1px solid var(--bor);border-left:3px solid ${pos.color};border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <b style="color:${pos.color};font-size:11px;letter-spacing:1px;text-transform:uppercase">${pos.name}</b>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--txt2)">${(pos.capital/capital*100).toFixed(0)}% · $${fmt(pos.capital)}</span>
+      </div>
+      <div class="g3">
+        <div><div class="rl">BTC</div><div style="font-family:var(--mono);font-size:13px;font-weight:700">${fmt(pos.btc0,6)}</div></div>
+        <div><div class="rl">USDC</div><div style="font-family:var(--mono);font-size:13px;font-weight:700">$${fmt(pos.usdc0)}</div></div>
+        <div><div class="rl">LP $</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc)">$${fmt(pos.btc0*price+pos.usdc0)}</div></div>
+        <div><div class="rl">Діапазон</div><div style="font-family:var(--mono);font-size:12px">$${fmt(pos.pa,0)}–$${fmt(pos.pb,0)}</div></div>
+        <div><div class="rl">APR / день</div><div style="font-family:var(--mono);font-size:12px">${(pos.apr*100).toFixed(0)}% / $${fmt(pos.capital*pos.apr/365)}</div></div>
+        <div><div class="rl">Сер. ціна (B3)</div><div style="font-family:var(--mono);font-size:12px;color:var(--ylw)">$${fmt(avg,0)}</div></div>
+        <div style="grid-column:span 3"><div class="rl">Статус</div><span class="badge ${inR?'bin':'bout'}">${inR?'✅ В рендж':'❌ Поза рендж'}</span></div>
+      </div></div>`;
+  }).join('');
+
+  // HF
+  const hfEl=document.getElementById('pr-hf');
+  hfEl.textContent=debt>0?fmt(hfNow,2):'∞';hfEl.style.color=hfCol(hfNow);
+  document.getElementById('pr-hfbar').style.width=Math.min(hfNow/3*100,100)+'%';
+  document.getElementById('pr-hfbar').style.background=hfCol(hfNow);
+  document.getElementById('pr-liq').textContent=`Ціна ліквідації: $${fmt(lprice,0)}`;
+  document.getElementById('pr-liqp').textContent='$'+fmt(lprice,0);
+  document.getElementById('pr-borrow').textContent=canBorrow>0?'+$'+fmt(canBorrow,0):(hfNow<2.5?'HF < 2.5':'—');
+  document.getElementById('pr-borrowsub').textContent=canBorrow>0?`Новий борг: $${fmt(debt+canBorrow,0)} · HF→${tgtHF}`:(hfNow<2.5?`Зараз HF ${fmt(hfNow,2)}`:'');
+
+  // Slider
+  const slMin=price*.3,slMax=price*2;
+  const sl=document.getElementById('pr-sl');
+  sl.min=slMin;sl.max=slMax;sl.step=(slMax-slMin)/400;sl.value=price;
+  document.getElementById('pr-slmin').textContent='$'+fmt(slMin,0);
+  document.getElementById('pr-slmax').textContent='$'+fmt(slMax,0);
+  G.slMin=slMin;G.slMax=slMax;
+
+  // Scenario table
+  const SCS=[{l:'−50%',m:.5},{l:'−30%',m:.7},{l:'−20%',m:.8},{l:'−10%',m:.9},{l:'Зараз',m:1},{l:'+10%',m:1.1},{l:'+20%',m:1.2},{l:'+30%',m:1.3},{l:'+50%',m:1.5}];
+  document.getElementById('pr-sctb').innerHTML=SCS.map(sc=>{
+    const r=planSc(sc.m*price);
+    const mc=sc.m<1?'var(--red)':sc.m>1?'var(--grn)':'var(--acc)';
+    return`<tr class="${sc.m===1?'ar':''}">
+      <td><b style="color:${mc}">${sc.l}</b></td><td>$${fmt(sc.m*price,0)}</td>
+      <td style="color:${pc(r.cc)};font-weight:700">$${fmt(r.nw,0)}</td>
+      <td style="color:${pc(r.cc)}">${ps(r.cc)}$${fmt(r.cc,0)} (${ps(r.ccP)}${fmt(r.ccP,1)}%)</td>
+      <td style="color:${hfCol(r.hf)}">${fmt(r.hf,2)}</td>
+      <td style="color:var(--grn)">${r.borrow>0?'+$'+fmt(r.borrow,0):'—'}</td>
+      ${positions.map(p=>`<td><span class="badge ${sc.m*price>=p.pa&&sc.m*price<=p.pb?'bin':'bout'}">${sc.m*price>=p.pa&&sc.m*price<=p.pb?'✅':'❌'}</span></td>`).join('')}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('planRes').style.display='block';
+  G.globalPrice = null; // reset on new plan
+  initGlobalSlider();
+  onPlanSlider();
+  // If sum tab was active, re-render it
+  if(document.getElementById('tab-sum').classList.contains('active')) renderSum();
+}
+
+function planSc(P1){
+  const{colBTC,debt,liqTh,tgtHF,netWorth,price}=G;
+  let lp=0;
+  positions.forEach(p=>lp+=posVal(p,P1));
+  const nw=lp+colBTC*P1-debt;
+  const hf=calcHF(colBTC,P1,debt,liqTh);
+  const borrow=hf>=2.5?maxBorrow(colBTC,P1,debt,liqTh,tgtHF):0;
+  const cc=nw-netWorth;
+  return{nw,hf,borrow,cc,ccP:netWorth>0?cc/netWorth*100:0};
+}
+
+function onPlanSlider(){
+  if(!G.ld&&!positions.length)return;
+  const P1=+document.getElementById('pr-sl').value;
+  document.getElementById('pr-slprice').textContent='$'+fmt(P1,0);
+  const r=planSc(P1);
+  let lp=0; positions.forEach(p=>lp+=posVal(p,P1));
+  let hodl=G.totalBTC*P1+G.totalUSDC;
+  const il=lp-hodl;
+  document.getElementById('sl-nw').textContent='$'+fmt(r.nw,0);
+  document.getElementById('sl-nw').style.color=pc(r.cc);
+  document.getElementById('sl-nwc').textContent=`${ps(r.cc)}$${fmt(r.cc,0)} (${ps(r.ccP)}${fmt(r.ccP,1)}%)`;
+  document.getElementById('sl-nwc').style.color=pc(r.cc);
+  document.getElementById('sl-lp').textContent='$'+fmt(lp,0);
+  document.getElementById('sl-il').textContent=`IL: ${ps(il)}$${fmt(il,0)}`;
+  document.getElementById('sl-il').style.color=pc(il);
+  document.getElementById('sl-hf').textContent=G.debt>0?fmt(r.hf,2):'∞';
+  document.getElementById('sl-hf').style.color=hfCol(r.hf);
+  const[wc,wt]=hfWarn(r.hf);
+  document.getElementById('sl-hfw').innerHTML=`<span class="warn ${wc}">${wt}</span>`;
+  document.getElementById('sl-borrow').textContent=r.borrow>0?'+$'+fmt(r.borrow,0):'—';
+  document.getElementById('sl-borrow').style.color=r.borrow>0?'var(--grn)':'var(--txt2)';
+}
+
+/* ==================== UNIFIED STEPS ==================== */
+// steps[] — єдиний масив кроків (замінює downSteps + upSteps)
+let steps = [];
+
+function initGlobalSlider(){
+  if(!G.price) return;
+  const sl = document.getElementById('global-slider');
+  const slMin = Math.min(G.price*0.2, 10000);
+  const slMax = 220000;
+  sl.min = slMin; sl.max = slMax;
+  sl.step = 100;
+  if(!G.globalPrice) G.globalPrice = G.price;
+  sl.value = G.globalPrice;
+  document.getElementById('global-sl-min').textContent = '$'+fmt(slMin,0);
+  document.getElementById('global-sl-max').textContent = '$'+fmt(slMax,0);
+  document.getElementById('global-sl-entry').textContent = '▲ Вхід $'+fmt(G.price,0);
+  onGlobalSlider();
+}
+
+function setGlobalPrice(p){
+  G.globalPrice = p;
+  const sl = document.getElementById('global-slider');
+  if(sl) sl.value = p;
+  onGlobalSlider();
+}
+
+function onGlobalSlider(){
+  const P = +document.getElementById('global-slider').value;
+  G.globalPrice = P;
+  G.stepsSliderPrice = P; // зворотна сумісність
+  document.getElementById('global-price-label').textContent = '$'+fmt(P,0);
+  // Track last withdrawal price for mark
+  const lastWithdraw = steps.filter(s=>s.withdrawBTC>0).slice(-1)[0];
+  G.withdrawPrice = lastWithdraw ? lastWithdraw.price : null;
+  // Update marks
+  renderSliderMarks(P);
+  // Update active tab content
+  const activeTab = document.querySelector('.tc.active');
+  if(activeTab){
+    if(activeTab.id==='tab-steps'){ renderStepsState(P); renderActivePositions(P); renderStepsList(); }
+    if(activeTab.id==='tab-sum'){ renderSum(); }
+  }
+}
+
+function renderSliderMarks(curP){
+  const sl = document.getElementById('global-slider');
+  const marks = document.getElementById('global-slider-marks');
+  if(!sl||!marks||!G.price) return;
+  const slMin = +sl.min, slMax = +sl.max;
+  const pct = p => Math.max(0,Math.min(100,(p-slMin)/(slMax-slMin)*100));
+
+  let html = '';
+  // Entry price mark
+  html += `<div style="position:absolute;left:${pct(G.price)}%;transform:translateX(-50%);top:0;font-size:9px;color:var(--acc);white-space:nowrap">▲</div>`;
+  // Steps marks
+  steps.forEach((s,i)=>{
+    if(!s.price) return;
+    const col = s.price < G.price ? 'var(--red)' : 'var(--grn)';
+    html += `<div style="position:absolute;left:${pct(s.price)}%;transform:translateX(-50%);top:0;font-size:9px;color:${col};white-space:nowrap" title="Крок ${i+1}">●</div>`;
+  });
+  // Withdrawal mark
+  if(G.withdrawPrice){
+    html += `<div style="position:absolute;left:${pct(G.withdrawPrice)}%;transform:translateX(-50%);top:0;font-size:9px;color:var(--ylw);white-space:nowrap" title="Вивід BTC">★</div>`;
+  }
+  marks.innerHTML = html;
+}
+
+// Alias for steps tab
+function initStepsSlider(){ initGlobalSlider(); }
+function onStepsSlider(){
+  const P = G.globalPrice||G.price;
+  renderStepsState(P); renderActivePositions(P); renderStepsList();
+}
+
+function getPortfolio(){
+  let btcFluid = G.colBTC||0;
+  let debt = G.debt||0;
+  let totalFees = 0;
+  let igSavedTotal = 0;
+  let closedCapital = 0;
+  let usdcRolledOver = 0;
+
+  steps.forEach(s=>{
+    // BTC from closed positions
+    s.closingIds.forEach(id=>{
+      const pos = positions.find(p=>String(p.id)===String(id));
+      const P = s.price||0;
+      if(pos && P>0){
+        const t = V3.getTokens(pos.L, P, pos.pa, pos.pb);
+        btcFluid += t.btc;
+        usdcRolledOver += t.usdc;
+        totalFees += pos.capital * pos.apr * (s.days||0) / 365;
+        closedCapital += pos.capital;
+      } else if(pos && P===0){
+        // price not set yet — don't add to fluid, just track capital
+        closedCapital += pos.capital;
+      }
+    });
+    debt += s.extraBorrow||0;
+    btcFluid -= s.withdrawBTC||0; // виведений BTC з Fluid
+    if(btcFluid<0) btcFluid=0;
+    // IG saved + IG з нового LP що вийшов вгору
+    if(s.igSaved) igSavedTotal += s.igSaved;
+    if(s._igAmount && s._igAmount>0) igSavedTotal += s._igAmount;
+    // fees (старий + новий LP)
+    if(s.feesEarned) totalFees += s.feesEarned;
+  });
+
+  const avgBuy = btcFluid>0 ? (closedCapital - usdcRolledOver - totalFees) / btcFluid : 0;
+  return{btcFluid, debt, totalFees, igSavedTotal, closedCapital, usdcRolledOver, avgBuy};
+}
+
+function getActiveLPValue(price){
+  const allClosed = new Set([
+    ...steps.flatMap(s=>s.closingIds.map(String)),
+  ]);
+  let val = 0;
+  positions.forEach(p=>{
+    if(allClosed.has(String(p.id))) return;
+    val += V3.posVal(p, price);
+  });
+  return val;
+}
+
+function renderStepsState(P){
+  const pf = getPortfolio();
+  const liqTh = (+document.getElementById('liqTh').value||80)/100;
+  const lpVal = getActiveLPValue(P);
+  const hf = calcHF(pf.btcFluid, P, pf.debt, liqTh);
+  const nw = lpVal + pf.btcFluid*P - pf.debt + pf.igSavedTotal;
+  const nwChange = nw - G.netWorth;
+
+  // IL/IG для v3: lpValue vs hodl (тримати початковий склад BTC+USDC)
+  // Формула: IL = LP_value(P1) - hodl_value(P1)
+  // hodl_value = btc0 * P1 + usdc0  (початковий склад при ціні входу)
+  // Коли ціна за діапазоном — LP повністю в одному активі, IL фіксований
+  const allClosed = new Set(steps.flatMap(s=>s.closingIds.map(String)));
+  let ilTotal = 0;
+  let ilDetails = [];
+  positions.filter(p=>!allClosed.has(String(p.id))).forEach(p=>{
+    const lpV = V3.posVal(p, P);
+    const hodlV = p.btc0*P + p.usdc0;
+    const il = lpV - hodlV;
+    const ilPct = hodlV>0 ? il/hodlV*100 : 0;
+    ilTotal += il;
+    ilDetails.push({name:p.name, il, ilPct, lpV, hodlV,
+      inRange: P>=p.pa && P<=p.pb,
+      allBTC: P<p.pa,
+      allUSDC: P>p.pb});
+  });
+  // BTC у Fluid: приріст/просадка відносно ціни входу в цю позицію
+  const debtImpact = pf.btcFluid>0 ? (P - G.price) * pf.btcFluid : 0;
+  // IL деталі для відображення
+  const ilDetailsHTML = ilDetails.map(d=>{
+    const col = d.il>=0?'var(--grn)':'var(--red)';
+    const namCol = d.name.includes('крок')?'var(--pur)':'var(--acc)';
+    const status = d.allBTC?'📉 все BTC':d.allUSDC?'📈 все USDC':'✅ в рендж';
+    return '<div style="font-family:var(--mono);font-size:10px;color:var(--txt2);padding:2px 0">'
+      +'<span style="color:'+namCol+'">'+d.name+'</span>: '
+      +'<span style="color:'+col+'">'+ps(d.il)+'$'+fmt(d.il,0)+' ('+ps(d.ilPct)+fmt(d.ilPct,1)+'%)</span> '
+      +status+'</div>';
+  }).join('');
+
+  document.getElementById('steps-state-cont').innerHTML = `
+    <div class="st">📊 Стан при $${fmt(P,0)}</div>
+    <div class="rg">
+      <div class="rc hi"><div class="rl">Net Worth</div><div class="rv" style="color:${pc(nwChange)}">$${fmt(nw,0)}</div><div class="rs">${ps(nwChange)}$${fmt(nwChange,0)} (${ps(nwChange)}${fmt(G.netWorth>0?nwChange/G.netWorth*100:0,1)}%)</div></div>
+      <div class="rc"><div class="rl">LP вартість</div><div class="rv">$${fmt(lpVal,0)}</div></div>
+      <div class="rc"><div class="rl">BTC у Fluid</div><div class="rv">${fmt(pf.btcFluid,6)}</div><div class="rs">$${fmt(pf.btcFluid*P,0)}</div></div>
+      <div class="rc red"><div class="rl">Борг USDC</div><div class="rv">$${fmt(pf.debt,0)}</div></div>
+      <div class="rc"><div class="rl">HF</div><div class="rv" style="color:${hfCol(hf)}">${pf.debt>0?fmt(hf,2):'∞'}</div></div>
+      <div class="rc ylw"><div class="rl">Середня ціна BTC</div><div class="rv">$${pf.btcFluid>0?fmt(pf.avgBuy,0):'—'}</div><div class="rs">${fmt(pf.btcFluid,6)} BTC у Fluid</div></div>
+      <div class="rc ${ilTotal>=0?'grn':'red'}">
+        <div class="rl">${ilTotal>=0?'IG (Impermanent Gain)':'IL (Impermanent Loss)'}</div>
+        <div class="rv">${ps(ilTotal)}$${fmt(ilTotal,0)}</div>
+        <div class="rs">${ilDetailsHTML}</div>
+      </div>
+      ${pf.btcFluid>0?`<div class="rc ${debtImpact>=0?'grn':'red'}">
+        <div class="rl">BTC у Fluid ${debtImpact>=0?'зріс':'впав'}</div>
+        <div class="rv">${ps(debtImpact)}$${fmt(debtImpact,0)}</div>
+        <div class="rs">vs ціна входу $${fmt(G.price,0)}</div>
+      </div>`:''}
+    </div>`;
+}
+
+function renderActivePositions(P){
+  const allClosed = new Set(steps.flatMap(s=>s.closingIds.map(String)));
+  const active = positions.filter(p=>!allClosed.has(String(p.id)));
+  const liqTh = (+document.getElementById('liqTh').value||80)/100;
+
+  document.getElementById('steps-active-positions').innerHTML = active.length ? active.map(p=>{
+    const t = V3.getTokens(p.L, P, p.pa, p.pb);
+    const val = t.btc*P + t.usdc;
+    const inR = P>=p.pa && P<=p.pb;
+    const allAbove = P >= p.pb; // LP вийшов вгору — все USDC = IG
+    const ig = allAbove ? t.usdc - p.capital : 0;
+    return `<div style="background:var(--bg);border:1px solid var(--bor);border-left:3px solid ${p.color};border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:${p.color};font-size:11px;letter-spacing:1px;text-transform:uppercase">${p.name}</b>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--txt2)">$${fmt(p.pa,0)}–$${fmt(p.pb,0)}</span>
+          <span class="badge ${inR?'bin':allAbove?'bylw':'bout'}">${inR?'✅ В рендж':allAbove?'📈 Вгору':'📉 Вниз'}</span>
+        </div>
+      </div>
+      <div class="g3">
+        <div><div class="rl">BTC</div><div style="font-family:var(--mono);font-size:13px;font-weight:700">${fmt(t.btc,6)}</div></div>
+        <div><div class="rl">USDC</div><div style="font-family:var(--mono);font-size:13px;font-weight:700">$${fmt(t.usdc,0)}</div></div>
+        <div><div class="rl">Вартість LP</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc)">$${fmt(val,0)}</div></div>
+        ${allAbove?`<div style="grid-column:span 3"><div class="rl">IG (приріст)</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--grn)">+$${fmt(ig,0)}</div></div>`:''}
+      </div>
+    </div>`;
+  }).join('') : '<p style="color:var(--txt2);font-size:12px">Немає активних позицій</p>';
+}
+
+function toggleNewLP(id){
+  const s=steps.find(x=>String(x.id)===String(id));
+  if(!s)return;
+  s.showNewLP = s.showNewLP===false ? true : false;
+  // recalc and re-render
+  recalcStepLP(s);
+  const si=steps.findIndex(x=>String(x.id)===String(id));
+  const card=document.getElementById('scard-'+id);
+  if(card){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=renderStepHTML(s,si);
+    card.outerHTML=tmp.querySelector('#scard-'+id)?.outerHTML||card.outerHTML;
+  }
+  onStepsSlider();
+}
+
+function addStep(withNewLP=true){
+  if(!G.price){alert('Спочатку розрахуй планувальник!');return;}
+  const P = G.globalPrice || G.price;
+  steps.push({
+    id:uid(), price:P, days:30,
+    closingIds:[], extraBorrow:0,
+    newPa:0, newPb:0, newAPR:60,
+    igSaved:0, feesEarned:0,
+    showNewLP: withNewLP
+  });
+  renderStepsList();
+}
+
+function removeStep(id){
+  const s = steps.find(x=>String(x.id)===String(id));
+  if(s) s.closingIds.forEach(pid=>{
+    const p=positions.find(x=>String(x.id)===String(pid));
+    if(p){p.status='active';p.closedPrice=0;}
+  });
+  steps = steps.filter(x=>String(x.id)!==String(id));
+  // Remove step LP from positions
+  positions = positions.filter(p=>String(p.id)!==('sp_'+id));
+  renderStepsList();
+  onStepsSlider();
+}
+
+function updateStep(id, field, value){
+  const s = steps.find(x=>String(x.id)===String(id));
+  if(!s) return;
+  s[field] = parseFloat(value)||0;
+  // Якщо змінили ціну кроку — оновлюємо глобальний повзунок
+  if(field==='price' && s.price>0){
+    G.globalPrice = s.price;
+    const sl = document.getElementById('global-slider');
+    if(sl) sl.value = s.price;
+    document.getElementById('global-price-label').textContent = '$'+fmt(s.price,0);
+    renderSliderMarks(s.price);
+  }
+  // Recalc step LP
+  recalcStepLP(s);
+  // Update only results div
+  const resDiv = document.getElementById('spres-'+id);
+  if(resDiv){
+    const si = steps.findIndex(x=>String(x.id)===String(id));
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderStepHTML(s,si);
+    const newRes = tmp.querySelector('#spres-'+id);
+    if(newRes) resDiv.innerHTML = newRes.innerHTML;
+  }
+  onStepsSlider();
+}
+
+function toggleStepClosing(stepId, posId){
+  posId = String(posId);
+  const s = steps.find(x=>String(x.id)===String(stepId));
+  if(!s) return;
+  const i = s.closingIds.findIndex(id=>String(id)===posId);
+  if(i>=0) s.closingIds.splice(i,1);
+  else s.closingIds.push(posId);
+  const pos = positions.find(p=>String(p.id)===posId);
+  if(pos){
+    pos.status = s.closingIds.includes(posId)?'pending':'active';
+    pos.closedPrice = s.closingIds.includes(posId)?s.price:0;
+  }
+  recalcStepLP(s);
+  const resDiv = document.getElementById('spres-'+stepId);
+  if(resDiv){
+    const si = steps.findIndex(x=>String(x.id)===String(stepId));
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderStepHTML(s,si);
+    const newRes = tmp.querySelector('#spres-'+stepId);
+    if(newRes) resDiv.innerHTML = newRes.innerHTML;
+  }
+  onStepsSlider();
+}
+
+function recalcStepLP(s){
+  const P = s.price||0;
+  if(P<=0) return;
+  // Collect from closed positions
+  let usdcFromClosed=0, btcFromClosed=0, fees=0;
+  s.closingIds.forEach(id=>{
+    const pos=positions.find(p=>String(p.id)===String(id));
+    if(!pos) return;
+    const t=V3.getTokens(pos.L,P,pos.pa,pos.pb);
+    btcFromClosed+=t.btc; usdcFromClosed+=t.usdc;
+    fees+=pos.capital*pos.apr*(s.days||0)/365;
+  });
+  s.feesEarned = fees;
+  s._btcFromClosed = btcFromClosed;
+  s._usdcFromClosed = usdcFromClosed;
+  // IG: if LP exited upward (all USDC), ig = usdc - capital
+  const totalCapClosed = s.closingIds.reduce((sum,id)=>{
+    const p=positions.find(x=>String(x.id)===String(id));
+    return sum+(p?p.capital:0);
+  },0);
+  // Check if any closed LP was above range (all USDC = IG)
+  s._igAmount = Math.max(0, usdcFromClosed - totalCapClosed);
+
+  const newCap = usdcFromClosed + (s.extraBorrow||0);
+  s._newCap = newCap;
+  let newL=0, newBTC=0, newUSDC=0, newVal=0;
+  if(s.newPa>0 && s.newPb>0 && newCap>0){
+    newL = calcL(newCap, P, s.newPa, s.newPb);
+    newBTC = gBTC(newL, P, s.newPa, s.newPb);
+    newUSDC = gUSDC(newL, P, s.newPa, s.newPb);
+    newVal = newBTC*P + newUSDC;
+  }
+  s._newL=newL; s._newBTC=newBTC; s._newUSDC=newUSDC; s._newVal=newVal;
+  // Fees нового LP
+  const newLPfees = newCap * (s.newAPR||0)/100 * (s.newDays||0) / 365;
+  s._newLPfees = newLPfees;
+  s.feesEarned = fees + newLPfees; // старий + новий
+
+  // Sync to positions[]
+  const posId = 'sp_'+s.id;
+  if(newL>0){
+    let ex = positions.find(p=>String(p.id)===posId);
+    if(!ex){
+      ex={id:posId,name:'LP крок '+(steps.indexOf(s)+1),color:'#a78bfa',
+        pa:s.newPa,pb:s.newPb,capital:newCap,apr:(s.newAPR||0)/100,
+        entryPrice:P,L:newL,btc0:newBTC,usdc0:newUSDC,
+        status:'active',feesEarned:0,isStepLP:true};
+      positions.push(ex);
+    } else {
+      Object.assign(ex,{pa:s.newPa,pb:s.newPb,capital:newCap,
+        apr:(s.newAPR||0)/100,entryPrice:P,L:newL,btc0:newBTC,usdc0:newUSDC});
+    }
+  } else {
+    const idx=positions.findIndex(p=>String(p.id)===posId);
+    if(idx>=0) positions.splice(idx,1);
+  }
+}
+
+function renderStepsList(){
+  const P = G.stepsSliderPrice || G.price || 0;
+  // Available to close = all active positions not closed by previous steps
+  document.getElementById('steps-list').innerHTML = steps.map((s,si)=>renderStepHTML(s,si)).join('');
+}
+
+function renderStepHTML(s, si){
+  const P = s.price || G.stepsSliderPrice || G.price || 0;
+  const liqTh = (+document.getElementById('liqTh').value||80)/100;
+  const tgtHF = +document.getElementById('tgtHF').value||2.0;
+
+  // State before this step
+  let btcBefore = G.colBTC||0, debtBefore = G.debt||0;
+  for(let i=0;i<si;i++){
+    const ps2=steps[i];
+    ps2.closingIds.forEach(id=>{
+      const pos=positions.find(p=>String(p.id)===String(id));
+      if(pos&&ps2.price>0){const t=V3.getTokens(pos.L,ps2.price,pos.pa,pos.pb);btcBefore+=t.btc;}
+    });
+    debtBefore+=ps2.extraBorrow||0;
+  }
+
+  // Positions available to close (not closed by prev steps)
+  const closedBefore = new Set(steps.slice(0,si).flatMap(ps2=>ps2.closingIds.map(String)));
+  const available = positions.filter(p=>!closedBefore.has(String(p.id))&&!p.isStepLP||(p.isStepLP&&steps.slice(0,si).some(ps2=>'sp_'+ps2.id===p.id)));
+
+  // Compute results
+  recalcStepLP(s);
+  const newBtcFluid = btcBefore + (s._btcFromClosed||0);
+  const newDebt = debtBefore + (s.extraBorrow||0);
+  const hfAfter = P>0&&newDebt>0 ? calcHF(newBtcFluid,P,newDebt,liqTh) : 999;
+  const maxBorr = hfAfter>tgtHF ? maxBorrow(newBtcFluid,P,newDebt,liqTh,tgtHF) : 0;
+
+  const layerBtns = available.map(pos=>{
+    const active = s.closingIds.includes(String(pos.id));
+    const t = V3.getTokens(pos.L, P, pos.pa, pos.pb);
+    const inR = P>=pos.pa&&P<=pos.pb;
+    const allUp = P>=pos.pb;
+    return `<span class="tag-btn" onclick="toggleStepClosing('${s.id}','${pos.id}')"
+      style="color:${active?'#0a0a0f':pos.color};background:${active?pos.color:'transparent'};border-color:${pos.color}">
+      ${pos.name} ${inR?'✅':allUp?'📈':'📉'} $${fmt(t.btc*P+t.usdc,0)}
+    </span>`;
+  }).join('');
+
+  return `<div class="scard" style="border-left:3px solid var(--pur);margin-bottom:12px" id="scard-${s.id}">
+    <div class="shead">
+      <span class="snum" style="color:var(--pur)">⚡ Крок ${si+1} · $${fmt(s.price,0)}</span>
+      <button class="sdel" onclick="removeStep('${s.id}')">✕</button>
+    </div>
+    <div class="smtitle">Стан перед кроком: BTC у Fluid: ${fmt(btcBefore,4)} · Борг: $${fmt(debtBefore,0)}</div>
+
+    <div class="g2" style="margin-bottom:10px">
+      <div class="f"><label>Ціна BTC кроку ($)</label>
+        <input type="number" value="${s.price||''}" onchange="updateStep('${s.id}','price',this.value)"></div>
+      <div class="f"><label>Днів старий LP в рендж</label>
+        <input type="number" value="${s.days||30}" onchange="updateStep('${s.id}','days',this.value)"></div>
+      <div class="f"><label>Днів новий LP в рендж</label>
+        <input type="number" value="${s.newDays||30}" onchange="updateStep('${s.id}','newDays',this.value)"></div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <span class="smtitle">Закрити позиції:</span>
+      <div>${layerBtns||'<span style="color:var(--txt2);font-size:11px">Немає доступних</span>'}</div>
+    </div>
+
+    <div id="spres-${s.id}">
+    ${s.closingIds.length>0?`
+      <div class="rg" style="margin-bottom:10px">
+        <div class="rc"><div class="rl">BTC з закритих</div><div class="rv">${fmt(s._btcFromClosed||0,6)}</div></div>
+        <div class="rc"><div class="rl">USDC з закритих</div><div class="rv">$${fmt(s._usdcFromClosed||0,0)}</div></div>
+        ${(s._igAmount||0)>0?`<div class="rc grn"><div class="rl">IG (вийшли вгору)</div><div class="rv">+$${fmt(s._igAmount,0)}</div></div>`:''}
+        <div class="rc grn"><div class="rl">Fees за ${s.days||0} днів</div><div class="rv">+$${fmt(s.feesEarned||0,1)}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="smtitle">Fluid після:</div>
+      <div class="rg" style="margin-bottom:10px">
+        <div class="rc"><div class="rl">BTC у Fluid</div><div class="rv">${fmt(newBtcFluid,6)}</div></div>
+        <div class="rc"><div class="rl">HF</div><div class="rv" style="color:${hfCol(hfAfter)}">${fmt(hfAfter,2)}</div></div>
+        <div class="rc grn"><div class="rl">Макс добір (HF→${tgtHF})</div><div class="rv">${maxBorr>0?'+$'+fmt(maxBorr,0):'—'}</div></div>
+        ${(s.withdrawBTC||0)>0?`<div class="rc ylw"><div class="rl">Виведено BTC</div><div class="rv">−${fmt(s.withdrawBTC,4)} BTC ($${fmt((s.withdrawBTC||0)*s.price,0)})</div></div>`:''}
+        <div class="rc"><div class="rl">Ціна ліквідації</div><div class="rv">$${fmt(liqPrice(newBtcFluid,newDebt,liqTh),0)}</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:10px">
+        <div class="f"><label>Добрати борг USDC ($)</label>
+          <input type="number" value="${s.extraBorrow||0}" onchange="updateStep('${s.id}','extraBorrow',this.value)"></div>
+        <div class="f"><label>Вивести BTC з Fluid (шт)</label>
+          <input type="number" value="${s.withdrawBTC||0}" step="0.001" onchange="updateStep('${s.id}','withdrawBTC',this.value)"></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span class="smtitle" style="margin-bottom:0">Новий LP:</span>
+        <button onclick="toggleNewLP('${s.id}')" style="background:var(--sur);border:1px solid var(--bor);border-radius:8px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--txt2);cursor:pointer">
+          ${s.showNewLP!==false?'Сховати ✕':'Показати +'}
+        </button>
+      </div>
+      ${s.showNewLP===false?'<div style="color:var(--txt2);font-size:11px;padding:4px 0">LP не відкривається — тільки закриття позиції</div>':''} 
+      ${s.showNewLP!==false?`<div class="g4" style="margin-bottom:10px">
+        <div class="f"><label>Pa ($)</label><input type="number" value="${s.newPa||''}" onchange="updateStep('${s.id}','newPa',this.value)"></div>
+        <div class="f"><label>Pb ($)</label><input type="number" value="${s.newPb||''}" onchange="updateStep('${s.id}','newPb',this.value)"></div>
+        <div class="f"><label>APR %</label><input type="number" value="${s.newAPR||60}" onchange="updateStep('${s.id}','newAPR',this.value)"></div>
+        <div class="f"><label>Капітал (авто)</label>
+          <div style="font-family:var(--mono);font-size:13px;padding:9px 11px;background:var(--sur2);border-radius:10px;border:1px solid var(--bor)">$${fmt(s._newCap||0,0)}</div>
+        </div>
+      </div>`:''}
+      ${s.showNewLP!==false&&(s._newVal||0)>0?`<div class="rg">
+        <div class="rc hi"><div class="rl">LP вартість</div><div class="rv">$${fmt(s._newVal,0)}</div></div>
+        <div class="rc"><div class="rl">BTC / USDC</div><div class="rv">${fmt(s._newBTC||0,6)}</div><div class="rs">$${fmt(s._newUSDC||0,0)}</div></div>
+        <div class="rc ylw"><div class="rl">Сер. ціна (B3)</div><div class="rv">$${fmt(avgBuyB3(s._newCap||0,s.price,s.newPa,s.newPb),0)}</div></div>
+        <div class="rc grn"><div class="rl">Fees нового LP (${s.newDays||0} днів)</div><div class="rv">+$${fmt(s._newLPfees||0,1)}</div></div>
+      </div>`:''}
+    `:''}
+    </div>
+  </div>`;
+}
+
+function renderDownTab(){ renderStepsTab(); }
+function renderUpTab(){ renderStepsTab(); }
+function renderStepsTab(){
+  initGlobalSlider();
+  const P = G.globalPrice||G.price||0;
+  renderStepsState(P);
+  renderActivePositions(P);
+  renderStepsList();
+}
+
+/* ==================== SUMMARY ==================== */
+function renderSum(){
+  if(!G.price||!G.capital){document.getElementById('sum-cont').innerHTML='<div class="sec"><p style="color:var(--txt2)">Спочатку розрахуй планувальник.</p></div>';return;}
+  const pf=getPortfolio();
+  const liqTh=(+document.getElementById('liqTh').value||80)/100;
+  const lendR=(+document.getElementById('lendR').value||5)/100;
+
+  // Use last non-zero exitPrice from any step
+  const allPrices=steps.map(s=>s.price||0).filter(p=>p>0);
+  const curPrice=G.globalPrice||( allPrices.length?allPrices[allPrices.length-1]:G.price);
+
+  // Active LP value — uses unified getActiveLPValue
+  // Try getActiveLPValue first, fallback to last step _L
+  let lpVal = getActiveLPValue(curPrice);
+  if(lpVal===0){
+    // Fallback: use last step with valid _L
+    const allStepsWithL=[...downSteps,...upSteps].filter(s=>s._L&&s._L>0&&s.newPa&&s.newPb);
+    if(allStepsWithL.length){
+      const last=allStepsWithL[allStepsWithL.length-1];
+      const t=V3.getTokens(last._L,curPrice,last.newPa,last.newPb);
+      // Add planner positions that are NOT closed
+      const closedIds=new Set(downSteps.flatMap(s=>s.closingIds));
+      positions.filter(p=>!p.isStepLP&&!closedIds.has(p.id)).forEach(p=>{
+        lpVal+=V3.posVal(p,curPrice);
+      });
+      lpVal+=t.btc*curPrice+t.usdc;
+    } else {
+      const closedIds=new Set(downSteps.flatMap(s=>s.closingIds));
+      positions.filter(p=>!closedIds.has(p.id)).forEach(p=>{lpVal+=V3.posVal(p,curPrice);});
+    }
+  }
+
+  const totalDays=steps.reduce((s,x)=>s+(x.days||0),0);
+  const interestAccrued=pf.debt*lendR*totalDays/365;
+  const totalPortfolio=lpVal+pf.btcFluid*curPrice-pf.debt+pf.igSavedTotal-interestAccrued;
+  const pnl=totalPortfolio-G.netWorth;
+  const pnlP=G.netWorth>0?pnl/G.netWorth*100:0;
+  const hfFinal=calcHF(pf.btcFluid,curPrice,pf.debt,liqTh);
+
+  // avgBuy = (капітал закритих позицій - fees) / BTC у Fluid
+  const avgBuy = pf.avgBuy||0;
+  const avgBuyNoFees = pf.btcFluid>0 ? ((pf.closedCapital||0)-(pf.usdcRolledOver||0)) / pf.btcFluid : 0;
+
+  const allSteps=[
+    ...downSteps.map((s,i)=>({type:'down',n:i+1,price:s.exitPrice,btcAdded:s.closingIds.reduce((sum,id)=>{const p=positions.find(x=>x.id===id);return sum+(p&&s.exitPrice?gBTC(p.L,s.exitPrice,p.pa,p.pb):0);},0),debt:s.extraBorrow||0,fees:s.closingIds.reduce((sum,id)=>{const p=positions.find(x=>x.id===id);return sum+(p?p.capital*p.apr*(s.days||0)/365:0);},0)})),
+    ...upSteps.map((s,i)=>({type:'up',n:i+1,price:s.exitPrice,ig:s._igAmount||0,fees:s.feesEarned||0,saved:s.igSaved||0})),
+  ];
+
+  // Build compact steps timeline
+  const stepsTimeline = steps.map((s,i)=>{
+    const closedNames = s.closingIds.map(id=>{
+      const p=positions.find(x=>String(x.id)===String(id));
+      return p?p.name:'?';
+    }).join(', ');
+    const dir = s.price < (G.price||0) ? '📉' : s.price > (G.price||0) ? '📈' : '⚡';
+    const lpLine = s.newPa&&s.newPb ? ` → LP $${fmt(s.newPa,0)}–$${fmt(s.newPb,0)} ($${fmt(s._newCap||0,0)})` : '';
+    const withdrawLine = s.withdrawBTC>0 ? ` · −${fmt(s.withdrawBTC,4)} BTC з Fluid` : '';
+    const borrowLine = s.extraBorrow>0 ? ` · борг +$${fmt(s.extraBorrow,0)}` : '';
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--sur2);border-radius:10px;border-left:3px solid var(--pur);margin-bottom:6px">'
+      +'<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--pur);white-space:nowrap">Крок '+(i+1)+' '+dir+'</span>'
+      +'<div style="font-family:var(--mono);font-size:11px;color:var(--txt2)">'
+      +'<b style="color:var(--txt)">$'+fmt(s.price,0)+'</b>'
+      +(closedNames?' · закрив: '+closedNames:'')
+      +lpLine+withdrawLine+borrowLine
+      +' <span style="color:var(--grn)">fees +$'+fmt(s.feesEarned||0,1)+'</span>'
+      +'</div></div>';
+  }).join('');
+
+  // Загальний APR = totalFees / capital / days * 365
+  const totalAPR = (G.capital>0 && totalDays>0) ? (pf.totalFees / G.capital / totalDays * 365) : 0;
+
+  // IL/IG розрахунок для підсумку
+  const allClosedSum = new Set(steps.flatMap(s=>s.closingIds.map(String)));
+
+  // "Без боргу" сценарій
+  let noDebtLPval = 0;
+  positions.filter(p=>!allClosedSum.has(String(p.id))).forEach(p=>{ noDebtLPval += V3.posVal(p,curPrice); });
+  const noDebtNW = noDebtLPval + pf.totalFees;
+  let ilSum = 0;
+  positions.filter(p=>!allClosedSum.has(String(p.id))).forEach(p=>{
+    ilSum += V3.posVal(p,curPrice) - (p.btc0*curPrice + p.usdc0);
+  });
+  const btcGain = pf.btcFluid * (curPrice - (G.price||curPrice));
+
+  document.getElementById('sum-cont').innerHTML=
+  (stepsTimeline.length ? '<div class="sec"><div class="st pur">⚡ Хронологія кроків</div>'+stepsTimeline+'</div>' : '')
+  +`<div class="sec">
+    <div class="st pur">🏁 Підсумок стратегії · ціна $${fmt(curPrice,0)}</div>
+    <div class="rg">
+      <div class="rc hi"><div class="rl">Загальний портфель</div><div class="rv" style="color:${pc(pnl)}">$${fmt(totalPortfolio,0)}</div></div>
+      <div class="rc hi"><div class="rl">PnL vs початок</div><div class="rv" style="color:${pc(pnl)}">${ps(pnl)}$${fmt(pnl,0)} (${ps(pnlP)}${fmt(pnlP,1)}%)</div></div>
+      <div class="rc"><div class="rl">LP вартість зараз</div><div class="rv">$${fmt(lpVal,0)}</div></div>
+      <div class="rc"><div class="rl">BTC у Fluid</div><div class="rv">${fmt(pf.btcFluid,6)} BTC</div><div class="rs">$${fmt(pf.btcFluid*curPrice,0)}</div></div>
+      <div class="rc red"><div class="rl">Борг + % нараховані</div><div class="rv">$${fmt(pf.debt+interestAccrued,0)}</div><div class="rs">% за ${totalDays} дн: $${fmt(interestAccrued,0)}</div></div>
+      <div class="rc"><div class="rl">HF</div><div class="rv" style="color:${hfCol(hfFinal)}">${pf.debt>0?fmt(hfFinal,2):'∞'}</div></div>
+      <div class="rc ylw"><div class="rl">Середня ціна BTC (з fees)</div><div class="rv">$${pf.btcFluid>0?fmt(avgBuy,0):'—'}</div><div class="rs">${fmt(pf.btcFluid,6)} BTC · без fees: $${fmt(avgBuyNoFees,0)}</div></div>
+      <div class="rc grn"><div class="rl">Всього fees / IG відкладено</div><div class="rv">$${fmt(pf.totalFees,0)} / $${fmt(pf.igSavedTotal,0)}</div></div>
+      <div class="rc" style="grid-column:span 2;background:rgba(124,255,212,.03);border-color:rgba(124,255,212,.2)">
+        <div class="rl" style="margin-bottom:8px">⚖️ З боргом vs без боргу</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div style="font-size:9px;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">З боргом (факт)</div>
+            <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:${pc(pnl)}">$${fmt(totalPortfolio,0)}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:${pc(pnl)}">${ps(pnl)}${fmt(pnlP,1)}%</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Без боргу (hodl LP)</div>
+            <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:${pc(noDebtNW-G.netWorth)}">$${fmt(noDebtNW,0)}</div>
+            <div style="font-family:var(--mono);font-size:11px;color:${pc(noDebtNW-G.netWorth)}">${ps(noDebtNW-G.netWorth)}${fmt(G.netWorth>0?(noDebtNW-G.netWorth)/G.netWorth*100:0,1)}%</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--txt2);margin-top:8px">
+          Перевага боргу: <span style="color:${pc(pnl-( noDebtNW-G.netWorth))}">${ps(pnl-(noDebtNW-G.netWorth))}$${fmt(pnl-(noDebtNW-G.netWorth),0)}</span>
+        </div>
+      </div>
+      <div class="rc hi"><div class="rl">Загальний APR на капітал</div><div class="rv" style="color:var(--acc)">${fmt(totalAPR*100,1)}%</div><div class="rs">Fees $${fmt(pf.totalFees,0)} / $${fmt(G.capital,0)} / ${fmt(totalDays,0)} днів × 365</div></div>
+      <div class="rc grn"><div class="rl">APR на весь капітал (fees)</div><div class="rv">${fmt(totalDays>0?(pf.totalFees/G.netWorth/totalDays*365*100):0,1)}%</div><div class="rs">за ${totalDays} днів · $${fmt(G.netWorth,0)} капітал</div></div>
+      <div class="rc ${ilSum>=0?'grn':'red'}">
+        <div class="rl">${ilSum>=0?'IG LP':' IL LP'} (vs hodl)</div>
+        <div class="rv">${ps(ilSum)}$${fmt(ilSum,0)}</div>
+      </div>
+      ${pf.btcFluid>0?`<div class="rc ${btcGain>=0?'grn':'red'}">
+        <div class="rl">BTC Fluid ${btcGain>=0?'приріст':'просадка'}</div>
+        <div class="rv">${ps(btcGain)}$${fmt(btcGain,0)}</div>
+        <div class="rs">${fmt(pf.btcFluid,6)} BTC × ($${fmt(curPrice,0)}−$${fmt(G.price,0)})</div>
+      </div>`:''}
+    </div>
+  </div>
+  ${allSteps.length?`<div class="sec">
+    <div class="st pur">📋 Всі кроки</div>
+    <div class="ox"><table><thead><tr>
+      <th>Крок</th><th>Тип</th><th>Ціна</th><th>BTC набрано</th><th>Борг +</th><th>Fees</th><th>IG</th>
+    </tr></thead><tbody>
+    ${allSteps.map(s=>`<tr>
+      <td>⚡ ${s.n}</td>
+      <td style="color:var(--pur)">Крок</td>
+      <td>$${fmt(s.price||0,0)}</td>
+      <td style="color:var(--acc)">${s.btcAdded>0?fmt(s.btcAdded,6)+' BTC':'—'}</td>
+      <td style="color:var(--red)">${s.debt?'+$'+fmt(s.debt,0):'—'}</td>
+      <td style="color:var(--grn)">+$${fmt(s.fees||0,1)}</td>
+      <td style="color:var(--grn)">${s.ig>0?'+$'+fmt(s.ig,0):'—'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>
+  </div>`:''}`;
+}
+
+/* ==================== SAVE / RESTORE ==================== */
+function saveState(){
+  if(!G.price) return;
+  const state = {
+    G: {capital:G.capital,price:G.price,colBTC:G.colBTC,debt:G.debt,
+        liqTh:G.liqTh,lendR:G.lendR,tgtHF:G.tgtHF,igLimit:G.igLimit,
+        globalPrice:G.globalPrice},
+    steps: steps.map(s=>({...s,_L:undefined,_newL:undefined})), // без функцій
+    layers: NAMS.map((_,i)=>({
+      pct:+document.getElementById('l'+i+'p').value||0,
+      pa: +document.getElementById('l'+i+'a').value||0,
+      pb: +document.getElementById('l'+i+'b').value||0,
+      apr:+document.getElementById('l'+i+'r').value||0,
+    }))
+  };
+  localStorage.setItem('lp_planner', JSON.stringify(state));
+  // Visual feedback
+  const btn = document.getElementById('save-btn');
+  if(btn){ btn.textContent='✅ Збережено'; setTimeout(()=>btn.textContent='💾 Зберегти',1500); }
+}
+
+function loadState(){
+  const raw = localStorage.getItem('lp_planner');
+  if(!raw) return;
+  try{
+    const state = JSON.parse(raw);
+    // Restore inputs
+    if(state.G){
+      document.getElementById('capital').value = state.G.capital||15000;
+      document.getElementById('price').value = state.G.price||69400;
+      document.getElementById('colBTC').value = state.G.colBTC||0;
+      document.getElementById('debt').value = state.G.debt||0;
+      document.getElementById('liqTh').value = (state.G.liqTh||0.8)*100;
+      document.getElementById('lendR').value = (state.G.lendR||0.05)*100;
+      document.getElementById('tgtHF').value = state.G.tgtHF||2.0;
+      document.getElementById('igLimit').value = state.G.igLimit||110000;
+    }
+    if(state.layers){
+      state.layers.forEach((l,i)=>{
+        document.getElementById('l'+i+'p').value = l.pct||0;
+        document.getElementById('l'+i+'a').value = l.pa||0;
+        document.getElementById('l'+i+'b').value = l.pb||0;
+        document.getElementById('l'+i+'r').value = l.apr||0;
+      });
+    }
+    // Recalc plan first
+    calcPlan();
+    // Restore steps
+    if(state.steps && state.steps.length){
+      steps = state.steps;
+      steps.forEach(s=>recalcStepLP(s));
+      if(state.G.globalPrice) { G.globalPrice=state.G.globalPrice; }
+    }
+    initGlobalSlider();
+    alert('✅ Стан відновлено!');
+  } catch(e){ console.error('Load error:', e); }
+}
+
+/* ==================== TAB SWITCH ==================== */
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['plan','steps','sum'][i]===t));
+  document.querySelectorAll('.tc').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(G.price) initGlobalSlider(); // sync slider only if plan calculated
+  if(t==='steps') renderStepsTab();
+  if(t==='sum') renderSum();
+}
+
+initLayers();
+</script>
+</body>
+</html>
